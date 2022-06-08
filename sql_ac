@@ -1,0 +1,17 @@
+with active_clients as (
+	select
+			sfdc_contract_status,
+			client_code,
+			program,
+			date_trunc('year', client_launch_date) as active_year
+	from data_sciences.sfdc_client_code_contract_program_dimensions
+	where sfdc_contract_status = 'Active'
+)
+    select  
+			count (*) n_client_code, 
+			active_clients.active_year,
+			active_clients.program
+			from active_clients
+			group by active_year, program
+			order by active_year desc, program; 
+			
