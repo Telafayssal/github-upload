@@ -1,0 +1,26 @@
+with members as (
+select Distinct date_trunc('year', month_start_utc) as start_year
+, enrolled 
+, user_id
+, program 
+from nonpii.member_program_monthly_summary 
+where enrolled = 1
+),
+
+program_end as (
+select Distinct date_trunc('year', month_end_utc) as end_year
+, user_id
+, program
+from nonpii.member_program_monthly_summary 
+where enrolled = 1
+)
+
+select 
+  m.start_year as Year 
+, pe.program 
+, count (Distinct user_id) as n_user_id
+from members m 
+join program_end pe using (user_id)
+where pe.end_year > m.start_year 
+group by year, pe.program
+order by 1, 2, 3;
