@@ -1,0 +1,25 @@
+with active_clients as (
+select distinct date_trunc('year', client_launch_date) as launch_year
+ , program
+from data_sciences.sfdc_client_code_contract_program_dimensions
+where launch_year is not null
+order by launch_year 
+),
+
+members as (
+select distinct date_trunc('year', month_start_utc) as start_year
+, client_code
+, program 
+from nonpii.member_program_monthly_summary 
+where enrolled_not_deactivated_not_lapsed = 1
+)
+
+select 
+m.program
+, ac.launch_year as Client_year
+, count (distinct m.client_code) as n_client_codes
+from members m
+join active_clients ac using(program)
+where launch_year >= start_year 
+group by  ac.launch_year, m.program
+order by 1,2,3
